@@ -1,0 +1,121 @@
+
+
+#Import global libraries to be used throughout the rest of the syntax
+import os
+import shutil
+import time
+import spss
+import spssaux
+import spssaux2 
+from datetime import (timedelta, datetime, date)
+
+
+
+#This timestamp is for pulling or saving a file with today's date
+#Calculate today's date
+today = date.today()
+
+
+#This timestamp is for pulling or saving a file with yesterday's date
+#Calculate yesterday's date
+yesterday = today - timedelta(days=1)
+
+
+#Reformat dates to mm/dd/yyyy format
+today = today.strftime("%m-%d-%Y")
+yesterday = yesterday.strftime("%m-%d-%Y")
+
+##Check the date strings
+print("Today is: " + today)
+print("Yesterday was: " + yesterday)
+
+
+
+
+#Also need to have date macros for SPSS
+spss.SetMacroValue("!FileDate","'" + yesterday + "'")
+spss.SetMacroValue("!Today", "'" + today + "'")
+
+#the string yesterday has now been translated into a string macro for SPSS
+#the macros are designated as !FileDate and !Today in SPSS
+
+
+
+
+
+#This is needed for automation--removes the need to edit SPSS syntax
+#  every school year to update the folder dates
+# Get current school year in 20xx-20xx format
+thisYear = datetime.now().year
+thisMon = int(date.today().strftime("%m"))
+
+
+if thisMon < 7:
+    schoolYear = str(thisYear-1) +'-'+ str(thisYear)
+else:
+    schoolYear= str(thisYear) +'-'+ str(thisYear+1)
+spss.SetMacroValue("!schoolYear", "'" + schoolYear + "'")
+
+
+
+
+#Need this part for pulling script files (the year is 20xx and stays the same
+#for the entire school year from Aug to July)
+
+if thisMon < 8:
+    sisYear = str(thisYear-1)
+else:
+    sisYear=str(thisYear)
+spss.SetMacroValue("!sisYear", "'" + sisYear + "'")
+
+#What you see above is taking the current school year and subtracting one
+#  if the month is Jan - July and using the current year if the month is between
+#  Aug to Dec
+#  i.e. school year 2024-2025 will be using script files with the year 2024 and
+#  when the 2024-2025 school year gets to second semester from Jan to July
+#  this will subtract one from the current year of 2025 making sure to pull SIS
+#  script files with the year 2024
+
+
+
+
+
+#check if the strings are correct
+schoolYear = str(schoolYear)
+print("This is the current SIS YEAR: " + sisYear)
+print("This is the current SCHOOL YEAR: " + schoolYear)
+
+
+
+
+
+
+
+
+#Need a trimmed version of 20xx-20yy in order to use it for the schools tables match
+#  the name of the school table I need to pull is SCHTABLExxyy
+#
+#Thus creating the string xxyy from 20xx-20yy
+
+trimmedYear = str(schoolYear[2:4] + schoolYear[7:])
+spss.SetMacroValue("!trimmedYear", "'" + trimmedYear + "'")
+
+
+#check if the strings are correct
+trimmedYear = str(trimmedYear)
+print("This is the current trimmed SCHOOL YEAR: " + trimmedYear)
+
+
+
+
+
+##UNCOMMENT WHEN NEEDED!!!!
+#Copying from KAMScripts folder to the Input folder with proper date.
+##input the file you need to pull from KAMScripts in the blank space!!!!
+##source = r'\\wwcna03.fcps.edu\wwc$\files\KAMScripts\Scripts_output\_______________________.csv'
+###Add the needed destination in the blanks below!!!!!!!
+##dest = r'\\wwcna03.fcps.edu\wwc$\files\DecSup\Decision Support\________________________\\' + schoolYear + '\\________________________________ ' + yesterday + '.csv'
+##shutil.copy2(source, dest)
+
+
+
